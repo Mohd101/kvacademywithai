@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -19,35 +18,43 @@ const Contact = () => {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // WhatsApp integration
-    const whatsappNumber = "+1234567890"; // Replace with actual WhatsApp number
-    const message = `Hi! I'm interested in KV AI Academy courses.
-    
-Name: ${formData.name}
-Email: ${formData.email}
-Phone: ${formData.phone}
-Interested Course: ${formData.course}
-Message: ${formData.message}`;
-    
-    const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
-    window.open(whatsappURL, '_blank');
-    
-    toast({
-      title: "Message Sent!",
-      description: "You'll be redirected to WhatsApp to complete your inquiry.",
-    });
+    try {
+      const response = await fetch('http://localhost:3001/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
 
-    // Reset form
-    setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      course: '',
-      message: ''
-    });
+      if (response.ok) {
+        toast({
+          title: "Message Sent!",
+          description: "We'll get back to you soon.",
+        });
+
+        // Reset form
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          course: '',
+          message: ''
+        });
+      } else {
+        throw new Error('Failed to send email');
+      }
+    } catch (error) {
+      console.error('Error sending email:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again later.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleWhatsAppDirect = () => {
@@ -132,12 +139,9 @@ Message: ${formData.message}`;
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="">Select a course</option>
-                    <option value="AI Fundamentals & Machine Learning">AI Fundamentals & Machine Learning</option>
-                    <option value="Deep Learning & Neural Networks">Deep Learning & Neural Networks</option>
-                    <option value="Natural Language Processing">Natural Language Processing</option>
-                    <option value="Computer Vision & Image AI">Computer Vision & Image AI</option>
-                    <option value="AI for Business & Strategy">AI for Business & Strategy</option>
-                    <option value="MLOps & AI Deployment">MLOps & AI Deployment</option>
+                    <option value="AI Essentials Skills">AI Essentials Skills</option>
+                    <option value="Data Analytics">Data Analytics</option>
+                    <option value="AI Engineer">AI Engineer</option>
                   </select>
                 </div>
               </div>
@@ -161,7 +165,7 @@ Message: ${formData.message}`;
                 type="submit"
                 className="w-full bg-gradient-hero text-white py-4 rounded-lg text-lg font-semibold hover:opacity-90 transition-opacity"
               >
-                Send Message via WhatsApp
+                Send Message
               </button>
             </form>
           </div>
